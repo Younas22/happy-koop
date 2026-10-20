@@ -1,8 +1,11 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+/*
+ * Cancels expired pending, unpaid checkouts. Safe by construction: the command
+ * only ever touches orders that are still pending AND unpaid AND past expiry.
+ */
+Schedule::command('happykoop:clean-expired-orders')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping();
