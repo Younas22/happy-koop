@@ -6,10 +6,13 @@ namespace App\Models;
 
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Coupon extends Model
 {
+    use HasFactory;
+
     public const TYPE_FIXED = 'fixed';
 
     public const TYPE_PERCENT = 'percent';

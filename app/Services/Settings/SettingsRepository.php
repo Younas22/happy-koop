@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Settings;
 
 use App\Models\Setting;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-use Illuminate\Contracts\Encryption\DecryptException;
 use InvalidArgumentException;
 
 /**
@@ -134,7 +135,7 @@ class SettingsRepository
             return null;
         }
 
-        return \Illuminate\Support\Carbon::parse($row['updated_at'])->toIso8601String();
+        return Carbon::parse($row['updated_at'])->toIso8601String();
     }
 
     public function set(string $key, mixed $value, ?int $userId = null): void

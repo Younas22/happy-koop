@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Services\AuditLogger;
 use App\Services\Settings\RuntimeConfigService;
+use App\Services\Settings\SettingsRegistry;
 use App\Services\Settings\SettingsRepository;
 use App\Support\Html;
 use App\Support\PublicUrl;
@@ -37,7 +38,7 @@ class StoreSettingsController extends ApiController
 
     public function update(StoreSettingsRequest $request): JsonResponse
     {
-        $this->authorize('update', new Setting());
+        $this->authorize('update', new Setting);
 
         /** @var User $actor */
         $actor = $request->user();
@@ -94,7 +95,7 @@ class StoreSettingsController extends ApiController
         foreach ((array) ($input['social'] ?? []) as $network => $url) {
             $key = 'social.'.$network;
 
-            if (! \App\Services\Settings\SettingsRegistry::has($key)) {
+            if (! SettingsRegistry::has($key)) {
                 continue;
             }
 

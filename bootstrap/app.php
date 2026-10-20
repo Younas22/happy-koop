@@ -2,6 +2,7 @@
 
 use App\Exceptions\ApiException;
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleCors as HappyKoopHandleCors;
 use App\Http\Requests\ApiRequest;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -52,6 +53,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // Webhook endpoints must never participate in the browser CORS
         // allowlist: payment providers are servers, not browsers.
         $middleware->replace(HandleCors::class, HappyKoopHandleCors::class);
+
+        // Every API request is a JSON request, whatever the caller's Accept
+        // header says. Must run before auth so AuthenticationException is
+        // rendered as 401 JSON instead of attempting a guest redirect.
+        $middleware->api(prepend: [
+            ForceJsonResponse::class,
+        ]);
 
         $middleware->alias([
             'abilities' => CheckAbilities::class,

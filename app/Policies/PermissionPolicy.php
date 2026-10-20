@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-class PermissionPolicy extends AdminPolicy
-{
-}
+class PermissionPolicy extends AdminPolicy {}

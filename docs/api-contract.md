@@ -875,6 +875,35 @@ Rules the backend enforces and tests assert:
 
 ---
 
+## 10a. Next.js proxy routes (frontend-owned, not part of this API)
+
+Because the typed API client is **server-only** (it resolves the base URL through
+runtime-config and reads the HttpOnly cookie via `next/headers`), and because
+`supports_credentials` is `false` in the default bearer topology, the browser cannot call
+Laravel directly. The frontend therefore exposes same-origin route handlers that proxy to
+this API from the Next.js server:
+
+| Next.js route | Proxies to | Notes |
+|---|---|---|
+| `POST /api/auth/login` | `POST /api/v1/auth/login` | Sets the `hk_session` HttpOnly cookie; the token is never returned to the browser |
+| `POST /api/auth/register` | `POST /api/v1/auth/register` | Same |
+| `POST /api/auth/logout` | `POST /api/v1/auth/logout` | Revokes upstream, then clears the cookie |
+| `GET /api/auth/session` | `GET /api/v1/auth/me` | Returns `{ data: { user } }` or `user: null`; never the token |
+| `POST /api/auth/forgot-password` | `POST /api/v1/auth/forgot-password` | Always reports success |
+| `POST /api/auth/reset-password` | `POST /api/v1/auth/reset-password` | |
+| `POST /api/cart/validate` | `POST /api/v1/cart/validate` | zod-validates ids/quantities and **strips unknown keys**, so no price-like field is ever forwarded |
+
+These are frontend implementation details. They are listed here only so both sides agree on
+where the trust boundary sits: the browser talks to Next.js, Next.js talks to Laravel, and
+Laravel remains the sole authority on price, role and payment state.
+
+Note also that every `/api/*` request to Laravel is coerced to a JSON request server-side
+(`ForceJsonResponse` middleware), so the error envelope in section 1.3 applies even when a
+caller omits `Accept: application/json`. Without it, an unauthenticated request fell through
+to Laravel's browser guest-redirect path and produced a 500 instead of the promised 401.
+
+---
+
 ## 11. Frontend environment variables (names only)
 
 | Name | Public | Purpose |

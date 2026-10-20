@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-class PaymentAttemptPolicy extends AdminPolicy
-{
-}
+class PaymentAttemptPolicy extends AdminPolicy {}

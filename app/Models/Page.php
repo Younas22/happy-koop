@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Page extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'slug', 'title', 'body', 'excerpt', 'seo_title', 'seo_description',
         'seo_noindex', 'is_published', 'published_at',

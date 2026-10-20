@@ -194,7 +194,7 @@ class MediaUploadService
     private function makeThumbnail(UploadedFile $file, string $disk, string $folder, string $filename): ?string
     {
         try {
-            $manager = new ImageManager(new GdDriver());
+            $manager = new ImageManager(new GdDriver);
             $image = $manager->read((string) $file->getRealPath());
             $image->scaleDown(width: (int) config('happykoop.media.thumbnail_width', 480));
 

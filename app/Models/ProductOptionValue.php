@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class ProductOptionValue extends Model
 {
+    use HasFactory;
+
     public $timestamps = false;
 
     protected $fillable = ['product_option_id', 'label', 'value', 'swatch_hex', 'sort_order'];

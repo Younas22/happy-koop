@@ -25,8 +25,8 @@ class StoreSettingsRequest extends ApiRequest
             'logoDarkMediaId' => ['sometimes', 'nullable', 'integer', 'exists:media,id'],
             'faviconMediaId' => ['sometimes', 'nullable', 'integer', 'exists:media,id'],
 
-            'primaryColor' => ['sometimes', 'nullable', 'string', new HexColorRule()],
-            'accentColor' => ['sometimes', 'nullable', 'string', new HexColorRule()],
+            'primaryColor' => ['sometimes', 'nullable', 'string', new HexColorRule],
+            'accentColor' => ['sometimes', 'nullable', 'string', new HexColorRule],
             'radius' => ['sometimes', 'string', 'in:none,sm,md,lg,xl'],
 
             'contactEmail' => ['sometimes', 'nullable', 'string', 'email:rfc', 'max:255'],
@@ -36,10 +36,10 @@ class StoreSettingsRequest extends ApiRequest
 
             'currency' => ['sometimes', 'string', 'in:'.implode(',', CurrencyRegistry::codes())],
             'locale' => ['sometimes', 'string', 'in:'.implode(',', MoneyFormatter::locales())],
-            'timezone' => ['sometimes', 'string', new TimezoneRule()],
+            'timezone' => ['sometimes', 'string', new TimezoneRule],
 
-            'canonicalFrontendUrl' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
-            'activeApiBaseUrl' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
+            'canonicalFrontendUrl' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
+            'activeApiBaseUrl' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
 
             'seoDefaultTitle' => ['sometimes', 'nullable', 'string', 'max:160'],
             'seoTitleTemplate' => ['sometimes', 'nullable', 'string', 'max:160'],
@@ -50,10 +50,10 @@ class StoreSettingsRequest extends ApiRequest
             'returnsSummary' => ['sometimes', 'nullable', 'string', 'max:2000'],
 
             'social' => ['sometimes', 'nullable', 'array'],
-            'social.instagram' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
-            'social.facebook' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
-            'social.tiktok' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
-            'social.x' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule()],
+            'social.instagram' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
+            'social.facebook' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
+            'social.tiktok' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
+            'social.x' => ['sometimes', 'nullable', 'string', 'max:2048', new PublicUrlRule],
 
             'features' => ['sometimes', 'array'],
             'features.reviews' => ['sometimes', 'boolean'],

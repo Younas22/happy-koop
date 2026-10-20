@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Category;
+use App\Models\Media;
 use App\Models\Product;
 use App\Services\Catalog\AvailabilityResolver;
 
@@ -45,7 +46,7 @@ final class ProductCardResource
         ];
     }
 
-    private static function primaryMedia(Product $product): ?\App\Models\Media
+    private static function primaryMedia(Product $product): ?Media
     {
         if ($product->primary_media_id !== null && $product->relationLoaded('primaryMedia')) {
             return $product->primaryMedia;

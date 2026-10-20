@@ -6,7 +6,6 @@
  * Everything here is deployment configuration, not store content. Store
  * content lives in the `settings` table and is edited by administrators.
  */
-
 $list = static function (string $env, string $default = ''): array {
     return array_values(array_filter(array_map(
         static fn (string $value): string => trim($value),

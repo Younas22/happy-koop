@@ -17,7 +17,7 @@ class OrderFulfilmentRequest extends ApiRequest
         return [
             'carrier' => ['sometimes', 'nullable', 'string', 'max:120'],
             'trackingNumber' => ['sometimes', 'nullable', 'string', 'max:120'],
-            'trackingUrl' => ['sometimes', 'nullable', 'string', 'max:1000', new PublicUrlRule()],
+            'trackingUrl' => ['sometimes', 'nullable', 'string', 'max:1000', new PublicUrlRule],
         ];
     }
 }

@@ -9,7 +9,6 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\User;
-use App\Services\Catalog\AvailabilityResolver;
 use App\Services\Catalog\CatalogContext;
 use App\Support\Money;
 

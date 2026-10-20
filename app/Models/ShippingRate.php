@@ -7,11 +7,14 @@ namespace App\Models;
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ShippingRate extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'shipping_zone_id', 'code', 'label', 'description', 'price_amount', 'currency',
         'min_subtotal_amount', 'free_above_amount', 'estimate_min_days', 'estimate_max_days',

@@ -16,7 +16,6 @@ use App\Models\ProductVariant;
 use App\Services\AuditLogger;
 use App\Support\Html;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**

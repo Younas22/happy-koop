@@ -6,8 +6,8 @@ namespace App\Http\Controllers\Api\V1\Payments;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\ApiController;
-use App\Http\Requests\Payments\PayPalCaptureRequest;
 use App\Http\Requests\Payments\PaymentOrderRequest;
+use App\Http\Requests\Payments\PayPalCaptureRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\PaymentAttempt;

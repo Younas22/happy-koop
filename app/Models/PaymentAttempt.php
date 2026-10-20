@@ -6,11 +6,14 @@ namespace App\Models;
 
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PaymentAttempt extends Model
 {
+    use HasFactory;
+
     public const STATUS_REQUIRES_PAYMENT = 'requires_payment';
 
     public const STATUS_PROCESSING = 'processing';

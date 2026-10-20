@@ -39,7 +39,7 @@ class PaymentSettingsController extends ApiController
 
     public function update(PaymentSettingsRequest $request): JsonResponse
     {
-        $this->authorize('update', new Setting());
+        $this->authorize('update', new Setting);
 
         /** @var User $actor */
         $actor = $request->user();
@@ -58,7 +58,7 @@ class PaymentSettingsController extends ApiController
      */
     public function test(Request $request): JsonResponse
     {
-        $this->authorize('update', new Setting());
+        $this->authorize('update', new Setting);
 
         /** @var User $actor */
         $actor = $request->user();

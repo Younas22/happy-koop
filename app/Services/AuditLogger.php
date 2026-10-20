@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\AuditLog;
-use App\Models\Model as _Unused;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 

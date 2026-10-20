@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Checkout;
 
 use App\Exceptions\ApiException;
+use App\Http\Resources\OrderResource;
 use App\Models\IdempotencyKey;
 use App\Models\Order;
 use App\Models\PaymentAttempt;
@@ -206,7 +207,7 @@ class CheckoutService
         $order->load(['items.product.primaryMedia']);
 
         $payload = [
-            'order' => \App\Http\Resources\OrderResource::withAccessToken($order),
+            'order' => OrderResource::withAccessToken($order),
             'paymentAttempt' => [
                 'id' => (int) $attempt->id,
                 'provider' => $attempt->provider,

@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Permission extends Model
 {
+    use HasFactory;
+
     /** Required to switch a payment provider into live mode. */
     public const PAYMENTS_MANAGE_LIVE = 'payments.manage_live';
 
