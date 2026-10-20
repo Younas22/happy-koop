@@ -7,6 +7,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'email',
         'password',
         'phone',
+        'avatar_media_id',
         'accepts_marketing',
         'last_login_at',
     ];
@@ -50,6 +52,12 @@ class User extends Authenticatable implements MustVerifyEmailContract
     }
 
     /* ----------------------------------------------------------- relations */
+
+    /** Optional profile picture, held in the media library. */
+    public function avatar(): BelongsTo
+    {
+        return $this->belongsTo(Media::class, 'avatar_media_id');
+    }
 
     public function roles(): BelongsToMany
     {

@@ -211,6 +211,21 @@ for unknown email and wrong password, to avoid account enumeration.
 `forgot-password` always returns `200 { "data": { "ok": true } }` regardless of whether the
 email exists.
 
+`GET /api/v1/auth/me` returns the viewer **nested under `user`**, mirroring the login
+payload rather than placing the resource directly under `data`:
+```json
+{ "data": { "user": {
+  "id": 7, "name": "Ada Lovelace", "email": "a@b.com",
+  "emailVerifiedAt": null, "isAdmin": false, "phone": null,
+  "acceptsMarketing": false, "createdAt": "2026-01-02T10:00:00+00:00"
+} } }
+```
+This is an explicit exception to the single-resource envelope in section 1.2, so the
+endpoint can later carry sibling fields (abilities, counts) without a breaking change.
+A client that unwraps only `data` receives the wrapper, whose `isAdmin` is `undefined` —
+which reads as "not an admin" and silently denies a real administrator. Unwrap
+`data.user`.
+
 ---
 
 ## 3. Public runtime config

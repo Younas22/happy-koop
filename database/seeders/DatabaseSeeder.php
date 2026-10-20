@@ -30,7 +30,10 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             SettingsSeeder::class,
             ShippingSeeder::class,
+            MediaLibrarySeeder::class,
+            DemoUserSeeder::class,
             CatalogSeeder::class,
+            DrawerDividerCatalogSeeder::class,
             CmsSeeder::class,
         ]);
 

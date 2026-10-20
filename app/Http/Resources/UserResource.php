@@ -24,6 +24,7 @@ final class UserResource
             'email' => $user->email,
             'emailVerifiedAt' => $user->email_verified_at?->toIso8601String(),
             'isAdmin' => $user->isAdmin(),
+            'avatarUrl' => $user->avatar?->url(),
             'createdAt' => $user->created_at?->toIso8601String(),
         ];
     }
@@ -56,6 +57,7 @@ final class UserResource
             'emailVerifiedAt' => $user->email_verified_at?->toIso8601String(),
             'acceptsMarketing' => (bool) $user->accepts_marketing,
             'isAdmin' => $user->isAdmin(),
+            'avatarUrl' => $user->avatar?->url(),
             'roles' => $user->roles->map(static fn ($role): array => [
                 'id' => (int) $role->id,
                 'name' => $role->name,
