@@ -67,11 +67,20 @@ class StoreSettingsRequest extends ApiRequest
             'navigation.primary' => ['sometimes', 'array', 'max:12'],
             'navigation.primary.*.label' => ['required', 'string', 'max:60'],
             'navigation.primary.*.href' => ['required', 'string', 'max:255'],
+            // Per-language labels. `label` stays the default-language text and
+            // the fallback; `labels` may only carry known language codes, so a
+            // payload cannot grow arbitrary keys inside a public setting.
+            'navigation.primary.*.labels' => ['sometimes', 'nullable', 'array:en,nl'],
+            'navigation.primary.*.labels.*' => ['nullable', 'string', 'max:60'],
             'navigation.footer' => ['sometimes', 'array', 'max:6'],
             'navigation.footer.*.heading' => ['required', 'string', 'max:60'],
+            'navigation.footer.*.headings' => ['sometimes', 'nullable', 'array:en,nl'],
+            'navigation.footer.*.headings.*' => ['nullable', 'string', 'max:60'],
             'navigation.footer.*.links' => ['required', 'array', 'max:12'],
             'navigation.footer.*.links.*.label' => ['required', 'string', 'max:60'],
             'navigation.footer.*.links.*.href' => ['required', 'string', 'max:255'],
+            'navigation.footer.*.links.*.labels' => ['sometimes', 'nullable', 'array:en,nl'],
+            'navigation.footer.*.links.*.labels.*' => ['nullable', 'string', 'max:60'],
         ];
     }
 }

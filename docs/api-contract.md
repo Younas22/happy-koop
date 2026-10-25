@@ -501,6 +501,20 @@ Auth: bearer (`customer`). Throttle 3/hour/user.
 - `isVerifiedPurchase` is computed server-side from paid orders. The client cannot set it.
 - Response `201 { "data": { "id": 44, "status": "pending" } }`.
 
+### `GET /api/v1/pages`
+Published CMS pages, without their bodies, ordered by title. Used by the storefront to
+link pages that `navigation.footer` does not mention, so a page created in the admin is
+reachable without editing the navigation settings. Pages with `seo.noindex` are excluded:
+a page the store asked search engines to ignore is not put into site-wide navigation.
+```json
+{ "data": [
+  { "id": 2, "slug": "shipping", "title": "Shipping", "excerpt": null,
+    "updatedAt": "2026-03-01T09:00:00+00:00" }
+] }
+```
+Not paginated - the list is small by nature, and the storefront needs all of it to
+de-duplicate against the configured navigation.
+
 ### `GET /api/v1/pages/{slug}`
 Public CMS page. `404` when unpublished.
 ```json
@@ -587,6 +601,33 @@ Response `200`:
 - `cartHash` is a server-computed fingerprint of (variant ids, quantities, unit prices,
   currency). It is passed to `checkout/initialize`; a mismatch there returns `422
   CART_CHANGED`.
+
+### `POST /api/v1/contact`
+
+Storefront contact form. Rate limited (`throttle:contact-submit`, 5/min per IP).
+
+Request:
+```json
+{ "name": "Ada Lovelace", "email": "ada@example.test",
+  "subject": "A question", "message": "At least ten characters." }
+```
+
+- `name` (required, 2-160), `email` (required, valid), `subject` (optional, <=180),
+  `message` (required, 10-5000). Values are sanitized (tags stripped) **before** the length
+  rules run, so a message that is only markup is a clean `422`, never a server error.
+- `website` is a honeypot: present and non-empty means `422`. A human never fills it.
+- The sender cannot choose a recipient. There is no such field, and the administrator's
+  address is resolved server-side from `store.contact_email` (falling back to the configured
+  mail sender).
+
+Response `201`:
+```json
+{ "data": { "reference": "HK-6BBVDLZK", "receivedAt": "2026-10-24T08:03:54+00:00" } }
+```
+
+The inquiry is persisted inside the request transaction and the two notification emails
+(administrator notification, visitor acknowledgement) are queued **after that transaction
+commits**, so a mail outage cannot lose a message. `201` means stored, not delivered.
 
 ### `GET /api/v1/shipping/options`
 Query: `country_code` (required, ISO-3166-1 alpha-2), `postal_code`, `subtotal_amount`
@@ -774,11 +815,11 @@ authorizes via a Policy. Hiding a menu item in the UI is not access control.
 | PUT | `/admin/products/{id}/specifications` | replace spec set |
 | PUT | `/admin/products/{id}/faqs` | |
 | PUT | `/admin/products/{id}/related` | |
-| GET/POST | `/admin/categories` | |
+| GET/POST | `/admin/categories` | list rows add `imageMediaId` to the public shape; `imageMediaId` is writable |
 | PATCH/DELETE | `/admin/categories/{id}` | rejects cycles in `parentId` |
 | GET | `/admin/orders` | filters: status, paymentStatus, q, date range |
 | GET | `/admin/orders/{id}` | |
-| PATCH | `/admin/orders/{id}/status` | validated transitions |
+| PATCH | `/admin/orders/{id}/status` | validated transitions; the first move into `delivered` records `delivered_at` and sends the customer's delivery email once |
 | PATCH | `/admin/orders/{id}/fulfilment` | carrier, trackingNumber, trackingUrl |
 | POST | `/admin/orders/{id}/refund` | provider refund; amount <= refundable |
 | GET | `/admin/customers` | search; no password hashes, no full payment data |

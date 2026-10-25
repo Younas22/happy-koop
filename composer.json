@@ -12,6 +12,7 @@
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^2.10.1",
         "mews/purifier": "^3.4",
+        "resend/resend-php": "^1.17",
         "stripe/stripe-php": "^22.0"
     },
     "require-dev": {

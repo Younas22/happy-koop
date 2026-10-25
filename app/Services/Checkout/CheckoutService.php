@@ -7,6 +7,7 @@ namespace App\Services\Checkout;
 use App\Exceptions\ApiException;
 use App\Http\Resources\OrderResource;
 use App\Models\IdempotencyKey;
+use App\Events\OrderPlaced;
 use App\Models\Order;
 use App\Models\PaymentAttempt;
 use App\Models\User;
@@ -205,6 +206,13 @@ class CheckoutService
         ]);
 
         $order->load(['items.product.primaryMedia']);
+
+        // Order confirmation emails. The event is `ShouldDispatchAfterCommit`,
+        // so it fires only once this transaction commits - a rolled-back
+        // checkout can never email a customer about an order that does not
+        // exist - and the listener claims `placed_notified_at` so a retried
+        // request or a replayed webhook cannot send a second confirmation.
+        OrderPlaced::dispatch($order);
 
         $payload = [
             'order' => OrderResource::withAccessToken($order),

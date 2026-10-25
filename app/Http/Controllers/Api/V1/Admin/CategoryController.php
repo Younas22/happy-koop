@@ -32,6 +32,9 @@ class CategoryController extends ApiController
 
         return $this->data(
             $categories->map(static fn (Category $category): array => CategoryResource::make($category) + [
+                // The admin form edits the image by id; the public resource only
+                // carries the resolved URL, which a picker cannot pre-select on.
+                'imageMediaId' => $category->image_media_id === null ? null : (int) $category->image_media_id,
                 'isActive' => (bool) $category->is_active,
                 'productCount' => (int) ($category->products_count ?? 0),
                 'seoTitle' => $category->seo_title,

@@ -27,6 +27,7 @@ use App\Http\Controllers\Api\V1\Payments\PayPalPaymentController;
 use App\Http\Controllers\Api\V1\Payments\StripePaymentController;
 use App\Http\Controllers\Api\V1\Public\CartController;
 use App\Http\Controllers\Api\V1\Public\CategoryController;
+use App\Http\Controllers\Api\V1\Public\ContactController;
 use App\Http\Controllers\Api\V1\Public\CheckoutController;
 use App\Http\Controllers\Api\V1\Public\HomeController;
 use App\Http\Controllers\Api\V1\Public\OrderLookupController;
@@ -115,6 +116,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('products/{slug}/reviews', [ProductReviewController::class, 'index']);
         Route::get('products/{slug}/related', [ProductController::class, 'related']);
 
+        Route::get('pages', [PageController::class, 'index']);
         Route::get('pages/{slug}', [PageController::class, 'show']);
         Route::get('home', [HomeController::class, 'index']);
 
@@ -122,6 +124,11 @@ Route::prefix('v1')->group(function (): void {
 
         Route::get('orders/by-number/{orderNumber}', [OrderLookupController::class, 'show']);
     });
+
+    // Contact form. Its own limiter: a form that emails the store is the one
+    // public endpoint worth abusing, and `public-read` is far too generous.
+    Route::post('contact', [ContactController::class, 'store'])
+        ->middleware('throttle:contact-submit');
 
     Route::post('cart/validate', [CartController::class, 'validateCart'])
         ->middleware('throttle:cart-validate');

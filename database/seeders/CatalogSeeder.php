@@ -14,9 +14,25 @@ use Illuminate\Database\Seeder;
  * Every product is named as a sample and carries only honest placeholder
  * copy. Deliberately NOT seeded: reviews, ratings, sales counts,
  * certifications, compare-at "discount" prices and delivery promises.
+ *
+ * Images are the shared demo photos from MediaLibrarySeeder, so that no card
+ * on the storefront renders an empty image frame. They are stand-ins: the
+ * photos are of the drawer dividers, not of these sample items, which is safe
+ * only because every one of these products is labelled "Sample:" and is not
+ * real stock. Attach real photography before publishing anything.
  */
 class CatalogSeeder extends Seeder
 {
+    /** Shared demo gallery, in display order, as imported by MediaLibrarySeeder. */
+    private const GALLERY = [
+        'divider-set-of-4.jpg',
+        'divider-install-anti-slip.jpg',
+        'divider-kitchen-drawer.jpg',
+        'divider-utensil-before-after.jpg',
+        'divider-clothing-drawer.jpg',
+        'divider-vanity-drawer.jpg',
+    ];
+
     public function run(): void
     {
         $categories = [
@@ -44,6 +60,7 @@ class CatalogSeeder extends Seeder
         $products = [
             [
                 'slug' => 'sample-pour-over-dripper',
+                'primary_image' => 'divider-kitchen-drawer.jpg',
                 'name' => 'Sample: Ceramic Pour-Over Dripper',
                 'sku' => 'SAMPLE-DRIP-01',
                 'short_description' => 'Sample catalogue item. Single-cup dripper in matte stoneware.',
@@ -64,6 +81,7 @@ class CatalogSeeder extends Seeder
             ],
             [
                 'slug' => 'sample-desk-organiser',
+                'primary_image' => 'divider-utensil-before-after.jpg',
                 'name' => 'Sample: Felt Desk Organiser',
                 'sku' => 'SAMPLE-DESK-01',
                 'short_description' => 'Sample catalogue item. Three-compartment desk tray.',
@@ -83,6 +101,7 @@ class CatalogSeeder extends Seeder
             ],
             [
                 'slug' => 'sample-canvas-tote',
+                'primary_image' => 'divider-clothing-drawer.jpg',
                 'name' => 'Sample: Heavy Canvas Tote',
                 'sku' => 'SAMPLE-TOTE-01',
                 'short_description' => 'Sample catalogue item. Everyday tote in undyed canvas.',
@@ -101,6 +120,7 @@ class CatalogSeeder extends Seeder
             ],
             [
                 'slug' => 'sample-insulated-bottle',
+                'primary_image' => 'divider-set-of-4.jpg',
                 'name' => 'Sample: Insulated Steel Bottle',
                 'sku' => 'SAMPLE-BOTL-01',
                 'short_description' => 'Sample catalogue item. 500 ml double-walled bottle.',
@@ -123,7 +143,8 @@ class CatalogSeeder extends Seeder
         foreach ($products as $data) {
             $specifications = $data['specifications'];
             $category = $data['category'];
-            unset($data['specifications'], $data['category']);
+            $primaryImage = $data['primary_image'];
+            unset($data['specifications'], $data['category'], $data['primary_image']);
 
             /** @var Product $product */
             $product = Product::query()->firstOrCreate(
@@ -144,6 +165,8 @@ class CatalogSeeder extends Seeder
 
             $product->categories()->syncWithoutDetaching([$categoryIds[$category]]);
 
+            $this->attachMedia($product, $primaryImage);
+
             if ($product->specifications()->count() === 0) {
                 foreach ($specifications as $index => $spec) {
                     $product->specifications()->create($spec + ['sort_order' => $index]);
@@ -152,5 +175,41 @@ class CatalogSeeder extends Seeder
         }
 
         $this->command?->info('Sample catalogue ensured (4 clearly-labelled sample products, no reviews).');
+    }
+
+    /**
+     * Gives the product its lead image followed by the rest of the gallery.
+     *
+     * Idempotent: a product that already has media keeps whatever an
+     * administrator arranged, so re-seeding never reorders a real gallery. A
+     * missing asset file is skipped rather than fatal, matching
+     * MediaLibrarySeeder::import(), so a partial checkout degrades to "no
+     * image" instead of aborting the seed.
+     */
+    private function attachMedia(Product $product, string $primaryFilename): void
+    {
+        if ($product->media()->count() > 0) {
+            return;
+        }
+
+        $ordered = array_values(array_unique(array_merge([$primaryFilename], self::GALLERY)));
+        $sort = 0;
+        $primaryId = null;
+
+        foreach ($ordered as $filename) {
+            $media = MediaLibrarySeeder::find($filename);
+
+            if ($media === null) {
+                continue;
+            }
+
+            $product->media()->attach($media->id, ['sort_order' => $sort]);
+            $primaryId ??= $media->id;
+            $sort++;
+        }
+
+        if ($primaryId !== null) {
+            $product->forceFill(['primary_media_id' => $primaryId])->save();
+        }
     }
 }

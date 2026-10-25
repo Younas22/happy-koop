@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Payments;
 
 use App\Exceptions\ApiException;
+use App\Events\OrderDelivered;
 use App\Models\Order;
 use App\Services\Inventory\InventoryService;
 use Illuminate\Support\Facades\DB;
@@ -166,10 +167,24 @@ class PaymentStatusMachine
             $attributes['cancelled_at'] = $order->cancelled_at ?? now();
         }
 
+        if ($to === Order::STATUS_DELIVERED) {
+            // Recorded here so the delivery email can quote a real date
+            // instead of the moment the email happened to be rendered.
+            $attributes['delivered_at'] = $order->delivered_at ?? now();
+        }
+
         $order->forceFill($attributes)->save();
 
         if ($to === Order::STATUS_CANCELLED) {
             $this->inventory->release($order->refresh());
+        }
+
+        // Delivery notification. This is the only place an order's status
+        // changes, and the guard above already returned when `from === to`,
+        // so re-saving Delivered dispatches nothing; the listener additionally
+        // claims `delivery_notified_at`, so even a replayed event sends once.
+        if ($to === Order::STATUS_DELIVERED) {
+            OrderDelivered::dispatch($order->refresh());
         }
 
         return true;

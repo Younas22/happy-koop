@@ -109,6 +109,8 @@ class HappyKoopServiceProvider extends ServiceProvider
         // --- public ---------------------------------------------------------
         RateLimiter::for('public-read', $perIp(120));
         RateLimiter::for('cart-validate', $perIp(60));
+        // A human sends one message, not five a minute.
+        RateLimiter::for('contact-submit', $perIp(5));
         RateLimiter::for('checkout-initialize', $perIp(20));
         RateLimiter::for('payments', $perIp(20));
         RateLimiter::for('reviews-submit', static fn (Request $request) => Limit::perHour(3)

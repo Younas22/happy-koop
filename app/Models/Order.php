@@ -50,6 +50,7 @@ class Order extends Model
         'billing_address', 'customer_note', 'admin_note', 'carrier',
         'tracking_number', 'tracking_url', 'refunded_amount',
         'placed_at', 'paid_at', 'cancelled_at', 'expires_at', 'inventory_committed_at',
+        'placed_notified_at', 'delivered_at', 'delivery_notified_at',
     ];
 
     protected $hidden = ['access_token'];
@@ -70,6 +71,9 @@ class Order extends Model
             'cancelled_at' => 'immutable_datetime',
             'expires_at' => 'immutable_datetime',
             'inventory_committed_at' => 'immutable_datetime',
+            'placed_notified_at' => 'immutable_datetime',
+            'delivered_at' => 'immutable_datetime',
+            'delivery_notified_at' => 'immutable_datetime',
             'created_at' => 'immutable_datetime',
             'updated_at' => 'immutable_datetime',
         ];
