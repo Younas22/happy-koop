@@ -120,7 +120,8 @@ class HappyKoopServiceProvider extends ServiceProvider
         RateLimiter::for('account', $perUser(120));
         RateLimiter::for('admin', $perUser(240));
         RateLimiter::for('admin-settings', $perUser(20));
-        RateLimiter::for('admin-media-upload', $perUser(30));
+        // The media library uploads a bulk selection one file per request.
+        RateLimiter::for('admin-media-upload', $perUser(120));
 
         // --- webhooks -------------------------------------------------------
         // Generous: providers retry aggressively, and every event is
