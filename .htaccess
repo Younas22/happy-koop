@@ -1,0 +1,29 @@
+# Serve Laravel from the project root (see index.php).
+# Local:  http://localhost/happy-koop      Live: https://shop.happykoop.be
+
+Options -Indexes -MultiViews
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Handle Authorization Header (Sanctum bearer tokens)
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Never expose dotfiles (.env, .git, ...) or the application source.
+    # .well-known stays reachable for SSL (AutoSSL / Let's Encrypt) validation.
+    RewriteRule (^|/)\.(?!well-known/) - [F]
+    RewriteRule ^(app|bootstrap|config|database|docs|resources|routes|storage/(app|framework|logs)|tests|vendor|node_modules)(/|$) - [F]
+    RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|[^/]+\.md)$ - [F]
+
+    # Public assets live in /public (uploaded images via the storage symlink).
+    RewriteRule ^(storage/.*|favicon\.ico|robots\.txt|build/.*)$ public/$1 [L]
+
+    # Everything else goes to the root front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

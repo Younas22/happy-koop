@@ -8,7 +8,8 @@ only through this API.
 - **API contract:** [`docs/api-contract.md`](docs/api-contract.md) — authoritative. Read it
   before changing any response shape.
 - **Base path:** `/api/v1`
-- **Local origin:** `http://127.0.0.1:8000`
+- **Local origin:** `http://localhost/happy-koop` (XAMPP Apache, no `php artisan serve` needed)
+- **Live origin:** `https://shop.happykoop.be`
 
 ---
 
