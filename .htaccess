@@ -17,11 +17,17 @@ Options -Indexes -MultiViews
     # Never expose dotfiles (.env, .git, ...) or the application source.
     # .well-known stays reachable for SSL (AutoSSL / Let's Encrypt) validation.
     RewriteRule (^|/)\.(?!well-known/) - [F]
-    RewriteRule ^(app|bootstrap|config|database|docs|resources|routes|storage/(app|framework|logs)|tests|vendor|node_modules)(/|$) - [F]
+    RewriteRule ^(app|bootstrap|config|database|docs|resources|routes|tests|vendor|node_modules)(/|$) - [F]
+    RewriteRule ^storage/(framework|logs|app(?!/public/))(/|$) - [F]
+    RewriteRule ^storage/app/public/.*\.(php\d?|phtml|phar)$ - [F,NC]
     RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|[^/]+\.md)$ - [F]
 
-    # Public assets live in /public (uploaded images via the storage symlink).
-    RewriteRule ^(storage/.*|favicon\.ico|robots\.txt|build/.*)$ public/$1 [L]
+    # Uploaded media: serve /storage/... straight from storage/app/public, so
+    # it works even where the host does not allow the storage:link symlink.
+    RewriteRule ^storage/(?!app/public/)(.+\.(jpe?g|png|webp|avif|gif|ico|mp4))$ storage/app/public/$1 [L,NC]
+
+    # Other public assets live in /public.
+    RewriteRule ^(storage/(?!app/public/).*|favicon\.ico|robots\.txt|build/.*)$ public/$1 [L]
 
     # Everything else goes to the root front controller.
     RewriteCond %{REQUEST_FILENAME} !-f
