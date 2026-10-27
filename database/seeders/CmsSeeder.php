@@ -107,14 +107,19 @@ class CmsSeeder extends Seeder
                             'body' => 'Rates and delivery windows come from your shipping settings.',
                         ],
                         [
-                            'icon' => 'arrow-path',
+                            'icon' => 'undo-2',
                             'title' => 'Returns window',
                             'body' => 'Set your real returns window per product in the admin panel.',
                         ],
                         [
-                            'icon' => 'lock-closed',
+                            'icon' => 'lock',
                             'title' => 'Payments stay server-side',
                             'body' => 'Card details are handled by your payment provider, never by this store.',
+                        ],
+                        [
+                            'icon' => 'life-buoy',
+                            'title' => 'Help when you need it',
+                            'body' => 'Questions about an order? Reach us through the contact page.',
                         ],
                     ],
                 ],
