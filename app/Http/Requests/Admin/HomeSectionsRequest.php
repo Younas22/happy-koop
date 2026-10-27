@@ -19,6 +19,8 @@ class HomeSectionsRequest extends ApiRequest
             'sections.*.type' => ['required', 'string', 'in:'.implode(',', HomeSection::types())],
             'sections.*.heading' => ['sometimes', 'nullable', 'string', 'max:160'],
             'sections.*.config' => ['sometimes', 'array'],
+            'sections.*.config.imageMediaIds' => ['sometimes', 'nullable', 'array', 'max:10'],
+            'sections.*.config.imageMediaIds.*' => ['integer', 'exists:media,id'],
             'sections.*.isActive' => ['sometimes', 'boolean'],
         ];
     }

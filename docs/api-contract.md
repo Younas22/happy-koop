@@ -530,7 +530,7 @@ Public CMS page. `404` when unpublished.
 Homepage composition, admin-managed.
 ```json
 { "data": {
-  "hero": { "headline": "...", "subheadline": null, "imageUrl": "...", "ctaLabel": "Shop now", "ctaHref": "/shop" },
+  "hero": { "headline": "...", "subheadline": null, "imageUrl": "...", "imageUrls": ["...", "..."], "ctaLabel": "Shop now", "ctaHref": "/shop" },
   "sections": [
     { "type": "category_tiles", "heading": "Browse", "categories": [ ] },
     { "type": "product_grid", "heading": "Featured", "products": [ ] },
@@ -541,6 +541,11 @@ Homepage composition, admin-managed.
 ```
 `hero` may be `null`. Unknown section `type` values must be skipped by the frontend, not
 rendered as errors.
+
+`hero.imageUrls` lists the hero slides in order (empty when none); `imageUrl` is the first
+of them, kept for older clients. In `/admin/home-sections` the hero config stores them as
+`imageMediaIds` (up to 10); a config that still has the older single `imageMediaId` is read
+as a one-slide list.
 
 ---
 
@@ -828,7 +833,7 @@ authorizes via a Policy. Hiding a menu item in the UI is not access control.
 | PATCH | `/admin/reviews/{id}` | `status` = approved \| rejected, `storeReply` |
 | GET/POST | `/admin/pages` | |
 | PATCH/DELETE | `/admin/pages/{id}` | |
-| GET/PUT | `/admin/home-sections` | |
+| GET/PUT | `/admin/home-sections` | hero `config.imageMediaIds`: up to 10 existing media ids |
 | GET/POST | `/admin/media` | upload |
 | DELETE | `/admin/media/{id}` | |
 | GET/PUT | `/admin/settings/store` | |

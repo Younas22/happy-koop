@@ -39,10 +39,13 @@ class HomeController extends ApiController
 
             if ($section->type === HomeSection::TYPE_HERO) {
                 if ($hero === null) {
+                    $imageUrls = $this->heroImageUrls($config);
                     $hero = [
                         'headline' => $config['headline'] ?? $section->heading,
                         'subheadline' => $config['subheadline'] ?? null,
-                        'imageUrl' => $this->mediaUrl($config['imageMediaId'] ?? null),
+                        // `imageUrl` stays for older clients: the first slide.
+                        'imageUrl' => $imageUrls[0] ?? null,
+                        'imageUrls' => $imageUrls,
                         'ctaLabel' => $config['ctaLabel'] ?? null,
                         'ctaHref' => $config['ctaHref'] ?? null,
                     ];
@@ -136,12 +139,31 @@ class HomeController extends ApiController
         ))->values()->all();
     }
 
-    private function mediaUrl(mixed $mediaId): ?string
+    /**
+     * The hero's slides, in the admin's order. `imageMediaIds` replaced the
+     * single `imageMediaId`, which is still read for sections saved before.
+     * Deleted media is skipped.
+     *
+     * @param  array<string, mixed>  $config
+     * @return list<string>
+     */
+    private function heroImageUrls(array $config): array
     {
-        if (! is_numeric($mediaId)) {
-            return null;
+        $ids = array_key_exists('imageMediaIds', $config)
+            ? (array) $config['imageMediaIds']
+            : [$config['imageMediaId'] ?? null];
+
+        $ids = array_values(array_unique(array_map('intval', array_filter($ids, 'is_numeric'))));
+
+        if ($ids === []) {
+            return [];
         }
 
-        return Media::query()->find((int) $mediaId)?->url();
+        $media = Media::query()->whereIn('id', $ids)->get()->keyBy('id');
+
+        return array_values(array_filter(array_map(
+            static fn (int $id): ?string => $media->get($id)?->url(),
+            $ids
+        )));
     }
 }
