@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\Account\AddressController;
 use App\Http\Controllers\Api\V1\Account\ProfileController;
 use App\Http\Controllers\Api\V1\Admin\AuditLogController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Api\V1\Admin\ContactInquiryController as AdminContactInquiryController;
 use App\Http\Controllers\Api\V1\Admin\CustomerController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\HomeSectionController;
@@ -225,6 +226,13 @@ Route::prefix('v1')->group(function (): void {
             // --- customers & reviews --------------------------------------
             Route::get('customers', [CustomerController::class, 'index']);
             Route::get('customers/{id}', [CustomerController::class, 'show'])->whereNumber('id');
+
+            Route::get('messages', [AdminContactInquiryController::class, 'index']);
+            Route::get('messages/{id}', [AdminContactInquiryController::class, 'show'])->whereNumber('id');
+            Route::patch('messages/{id}', [AdminContactInquiryController::class, 'update'])->whereNumber('id');
+            Route::delete('messages/{id}', [AdminContactInquiryController::class, 'destroy'])->whereNumber('id');
+            Route::post('messages/bulk-delete', [AdminContactInquiryController::class, 'bulkDestroy']);
+            Route::patch('messages/bulk-status', [AdminContactInquiryController::class, 'bulkUpdate']);
 
             Route::get('reviews', [AdminReviewController::class, 'index']);
             Route::patch('reviews/{id}', [AdminReviewController::class, 'update'])->whereNumber('id');

@@ -103,9 +103,10 @@ php artisan schedule:work   # expires abandoned pending orders
 Without a worker, payment webhooks are still **recorded** (so nothing is lost and
 idempotency holds) but their side effects will not be applied until one runs.
 
-Emails (order and contact) are queued too, so they are only sent while a worker runs.
-On shared hosting without a persistent process, a cron entry such as
-`* * * * * php artisan queue:work --stop-when-empty` does the job.
+Emails (order and contact) do **not** need the worker: they go through the `deferred`
+queue connection, which sends them right after the response in the same process.
+Once a worker runs permanently, set `MAIL_QUEUE_CONNECTION=database` to queue them
+instead and get automatic retries.
 
 ### Email sender
 

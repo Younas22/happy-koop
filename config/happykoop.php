@@ -45,6 +45,13 @@ return [
         'max_quantity_per_line' => 99,
     ],
 
+    'mail' => [
+        // `deferred` sends store emails right after the response, without a
+        // queue worker. Set to `database` once `php artisan queue:work` runs
+        // permanently, to get automatic retries.
+        'queue_connection' => env('MAIL_QUEUE_CONNECTION', 'deferred'),
+    ],
+
     'media' => [
         'disk' => env('MEDIA_DISK', 'uploads'),
         'max_image_bytes' => 8 * 1024 * 1024,

@@ -32,16 +32,16 @@
                         <td style="height:4px; background-color:{{ $brandColor }}; line-height:4px; font-size:0;">&nbsp;</td>
                     </tr>
                     <tr>
-                        <td style="padding:24px 28px 8px 28px;">
+                        <td align="center" style="padding:28px 28px 16px 28px; text-align:center; border-bottom:1px solid #f0f1f4;">
                             @if (!empty($logoUrl))
-                                <img src="{{ $logoUrl }}" alt="{{ $storeName }}" height="32" style="height:32px; width:auto; max-width:200px; display:block; border:0;">
+                                <img src="{{ $logoUrl }}" alt="{{ $storeName }}" height="60" style="height:60px; width:auto; max-width:260px; display:block; margin:0 auto; border:0;">
                             @else
-                                <span style="font-size:20px; font-weight:700; color:#15181d; letter-spacing:-0.01em;">{{ $storeName }}</span>
+                                <span style="font-size:24px; font-weight:700; color:#15181d; letter-spacing:-0.01em;">{{ $storeName }}</span>
                             @endif
                         </td>
                     </tr>
                     <tr>
-                        <td style="padding:8px 28px 28px 28px; color:#15181d; font-size:15px; line-height:1.6;">
+                        <td style="padding:24px 28px 28px 28px; color:#15181d; font-size:15px; line-height:1.6;">
                             @yield('content')
                         </td>
                     </tr>

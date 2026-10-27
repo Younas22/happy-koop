@@ -69,6 +69,25 @@ class TransactionalEmailTest extends TestCase
      * Contact inquiries
      * ------------------------------------------------------------------ */
 
+    public function test_contact_emails_are_delivered_without_a_queue_worker(): void
+    {
+        $this->seedStore();
+        $this->settings()->set('store.contact_email', 'owner@happykoop.test');
+        // The real default: no Mail::fake, no worker, the deferred connection.
+        config(['mail.default' => 'array', 'happykoop.mail.queue_connection' => 'deferred']);
+        $this->withoutDefer();
+
+        $this->postJson('/api/v1/contact', $this->contactPayload())->assertCreated();
+
+        $sent = app('mail.manager')->mailer('array')->getSymfonyTransport()->messages();
+        $recipients = $sent->map(
+            static fn ($message): string => $message->getEnvelope()->getRecipients()[0]->getAddress()
+        )->sort()->values()->all();
+
+        $this->assertSame(['ada@example.test', 'owner@happykoop.test'], $recipients);
+        $this->assertDatabaseCount('jobs', 0);
+    }
+
     public function test_the_contact_form_stores_the_inquiry_and_queues_both_emails(): void
     {
         $this->seedStore();

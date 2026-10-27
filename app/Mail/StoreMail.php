@@ -6,6 +6,7 @@ namespace App\Mail;
 
 use App\Services\Mail\MailContext;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\Factory as Queue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -32,6 +33,22 @@ abstract class StoreMail extends Mailable implements ShouldQueue
 
     /** Spaced out, so a provider blip is not hammered three times in a second. */
     public array $backoff = [30, 120];
+
+    /**
+     * Picks the queue connection when the mail is queued.
+     *
+     * The default, `deferred`, sends right after the HTTP response (or after
+     * the current queue job) in the same process, so email works on hosting
+     * without a persistent queue worker; it does not retry. With a worker
+     * running, `happykoop.mail.queue_connection` can point at `database` to get
+     * the retries above back.
+     */
+    public function queue(Queue $queue)
+    {
+        $this->connection ??= (string) config('happykoop.mail.queue_connection', 'deferred');
+
+        return parent::queue($queue);
+    }
 
     protected function context(): MailContext
     {
