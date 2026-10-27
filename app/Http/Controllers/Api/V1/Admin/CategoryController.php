@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\ApiController;
+use App\Http\Requests\Admin\BulkIdsRequest;
 use App\Http\Requests\Admin\CategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
@@ -84,6 +85,22 @@ class CategoryController extends ApiController
         $this->audit->log('category.deleted', $request->user()?->id, $category, ['deleted_at'], $request);
 
         return response()->json(null, 204);
+    }
+
+    public function bulkDestroy(BulkIdsRequest $request): JsonResponse
+    {
+        $deleted = [];
+
+        foreach (Category::query()->whereIn('id', $request->ids())->get() as $category) {
+            $this->authorize('delete', $category);
+
+            $category->delete();
+            $deleted[] = (int) $category->id;
+
+            $this->audit->log('category.deleted', $request->user()?->id, $category, ['deleted_at'], $request);
+        }
+
+        return $this->data(['succeeded' => $deleted, 'failed' => []]);
     }
 
     /**

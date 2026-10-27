@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\ApiController;
+use App\Http\Requests\Admin\BulkIdsRequest;
 use App\Http\Requests\Admin\MediaUploadRequest;
 use App\Http\Resources\MediaResource;
 use App\Models\Media;
@@ -77,5 +78,21 @@ class MediaController extends ApiController
         $this->uploads->delete($media);
 
         return response()->json(null, 204);
+    }
+
+    public function bulkDestroy(BulkIdsRequest $request): JsonResponse
+    {
+        $deleted = [];
+
+        foreach (Media::query()->whereIn('id', $request->ids())->get() as $media) {
+            $this->authorize('delete', $media);
+
+            $this->audit->log('media.deleted', $request->user()?->id, $media, ['path'], $request);
+
+            $this->uploads->delete($media);
+            $deleted[] = (int) $media->id;
+        }
+
+        return $this->data(['succeeded' => $deleted, 'failed' => []]);
     }
 }

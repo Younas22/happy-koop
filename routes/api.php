@@ -195,6 +195,7 @@ Route::prefix('v1')->group(function (): void {
             Route::get('products/{id}', [AdminProductController::class, 'show'])->whereNumber('id');
             Route::patch('products/{id}', [AdminProductController::class, 'update'])->whereNumber('id');
             Route::delete('products/{id}', [AdminProductController::class, 'destroy'])->whereNumber('id');
+            Route::post('products/bulk-delete', [AdminProductController::class, 'bulkDestroy']);
 
             Route::post('products/{id}/media', [AdminProductController::class, 'attachMedia'])->whereNumber('id');
             Route::patch('products/{id}/media/reorder', [AdminProductController::class, 'reorderMedia'])->whereNumber('id');
@@ -208,6 +209,7 @@ Route::prefix('v1')->group(function (): void {
             Route::post('categories', [AdminCategoryController::class, 'store']);
             Route::patch('categories/{id}', [AdminCategoryController::class, 'update'])->whereNumber('id');
             Route::delete('categories/{id}', [AdminCategoryController::class, 'destroy'])->whereNumber('id');
+            Route::post('categories/bulk-delete', [AdminCategoryController::class, 'bulkDestroy']);
 
             // --- orders ----------------------------------------------------
             Route::get('orders', [AdminOrderController::class, 'index']);
@@ -215,6 +217,9 @@ Route::prefix('v1')->group(function (): void {
             Route::patch('orders/{id}/status', [AdminOrderController::class, 'updateStatus'])->whereNumber('id');
             Route::patch('orders/{id}/fulfilment', [AdminOrderController::class, 'updateFulfilment'])->whereNumber('id');
             Route::post('orders/{id}/refund', [AdminOrderController::class, 'refund'])->whereNumber('id');
+            Route::delete('orders/{id}', [AdminOrderController::class, 'destroy'])->whereNumber('id');
+            Route::patch('orders/bulk-status', [AdminOrderController::class, 'bulkUpdateStatus']);
+            Route::post('orders/bulk-delete', [AdminOrderController::class, 'bulkDestroy']);
 
             // --- customers & reviews --------------------------------------
             Route::get('customers', [CustomerController::class, 'index']);
@@ -238,6 +243,7 @@ Route::prefix('v1')->group(function (): void {
             Route::post('media', [MediaController::class, 'store'])
                 ->middleware('throttle:admin-media-upload');
             Route::delete('media/{id}', [MediaController::class, 'destroy'])->whereNumber('id');
+            Route::post('media/bulk-delete', [MediaController::class, 'bulkDestroy']);
 
             // --- settings --------------------------------------------------
             Route::middleware('throttle:admin-settings')->group(function (): void {

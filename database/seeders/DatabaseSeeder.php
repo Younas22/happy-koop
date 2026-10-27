@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Services\Settings\StoreCurrency;
 use Illuminate\Database\Seeder;
 
 /**
@@ -36,6 +37,10 @@ class DatabaseSeeder extends Seeder
             DrawerDividerCatalogSeeder::class,
             CmsSeeder::class,
         ]);
+
+        // The demo rows are written in USD; move them to whatever currency the
+        // store is set to, so a re-seed cannot leave a mixed-currency catalog.
+        app(StoreCurrency::class)->syncCatalog();
 
         $this->command?->newLine();
         $this->command?->info('HappyKoop demo data seeded. No reviews, ratings or discounts were created:');

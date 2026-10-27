@@ -31,9 +31,4 @@ class OrderPolicy extends AdminPolicy
     {
         return false;
     }
-
-    public function delete(User $user, Model $model): bool
-    {
-        return false;
-    }
 }

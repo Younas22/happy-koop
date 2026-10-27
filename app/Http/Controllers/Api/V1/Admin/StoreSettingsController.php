@@ -12,6 +12,7 @@ use App\Services\AuditLogger;
 use App\Services\Settings\RuntimeConfigService;
 use App\Services\Settings\SettingsRegistry;
 use App\Services\Settings\SettingsRepository;
+use App\Services\Settings\StoreCurrency;
 use App\Support\Html;
 use App\Support\PublicUrl;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +28,7 @@ class StoreSettingsController extends ApiController
         private readonly SettingsRepository $settings,
         private readonly RuntimeConfigService $runtimeConfig,
         private readonly AuditLogger $audit,
+        private readonly StoreCurrency $storeCurrency,
     ) {}
 
     public function show(): JsonResponse
@@ -138,6 +140,11 @@ class StoreSettingsController extends ApiController
                 );
                 $writes[] = 'navigation.'.$part;
             }
+        }
+
+        // Products, shipping rates and fixed coupons follow the store currency.
+        if (in_array('locale.currency', $writes, true)) {
+            $this->storeCurrency->syncCatalog();
         }
 
         // Saving bumps configVersion and invalidates the runtime-config cache.

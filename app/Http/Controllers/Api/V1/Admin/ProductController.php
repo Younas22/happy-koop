@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Api\V1\ApiController;
+use App\Http\Requests\Admin\BulkIdsRequest;
 use App\Http\Requests\Admin\ProductMediaRequest;
 use App\Http\Requests\Admin\ProductRequest;
 use App\Http\Resources\Admin\AdminProductResource;
 use App\Models\Product;
 use App\Services\AuditLogger;
+use App\Services\Settings\StoreCurrency;
 use App\Support\Html;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -31,7 +33,10 @@ class ProductController extends ApiController
         'stock_asc' => ['stock_quantity', 'asc'],
     ];
 
-    public function __construct(private readonly AuditLogger $audit) {}
+    public function __construct(
+        private readonly AuditLogger $audit,
+        private readonly StoreCurrency $storeCurrency,
+    ) {}
 
     public function index(Request $request): JsonResponse
     {
@@ -148,6 +153,26 @@ class ProductController extends ApiController
         return response()->json(null, 204);
     }
 
+    /**
+     * Soft-deletes several products at once. Ids that do not exist (or are
+     * already deleted) are skipped and not reported as failures.
+     */
+    public function bulkDestroy(BulkIdsRequest $request): JsonResponse
+    {
+        $deleted = [];
+
+        foreach (Product::query()->whereIn('id', $request->ids())->get() as $product) {
+            $this->authorize('delete', $product);
+
+            $product->delete();
+            $deleted[] = (int) $product->id;
+
+            $this->audit->log('product.deleted', $request->user()?->id, $product, ['deleted_at'], $request);
+        }
+
+        return $this->data(['succeeded' => $deleted, 'failed' => []]);
+    }
+
     public function attachMedia(ProductMediaRequest $request, int $id): JsonResponse
     {
         $product = $this->find($id);
@@ -200,7 +225,9 @@ class ProductController extends ApiController
     private function attributes(ProductRequest $request, ?Product $existing): array
     {
         $input = $request->validated();
-        $out = [];
+        // Always the store currency, whatever the request sent: a product in
+        // any other currency cannot be shown or bought (see StoreCurrency).
+        $out = ['currency' => $this->storeCurrency->code()];
 
         $direct = [
             'name' => 'name',
@@ -210,7 +237,6 @@ class ProductController extends ApiController
             'priceAmount' => 'price_amount',
             'compareAtAmount' => 'compare_at_amount',
             'costAmount' => 'cost_amount',
-            'currency' => 'currency',
             'inventoryPolicy' => 'inventory_policy',
             'stockQuantity' => 'stock_quantity',
             'lowStockThreshold' => 'low_stock_threshold',

@@ -6,6 +6,8 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Exceptions\ApiException;
 use App\Http\Controllers\Api\V1\ApiController;
+use App\Http\Requests\Admin\BulkIdsRequest;
+use App\Http\Requests\Admin\BulkOrderStatusRequest;
 use App\Http\Requests\Admin\OrderFulfilmentRequest;
 use App\Http\Requests\Admin\OrderStatusRequest;
 use App\Http\Requests\Admin\RefundRequest;
@@ -13,6 +15,7 @@ use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\PaymentAttempt;
 use App\Services\AuditLogger;
+use App\Services\Inventory\InventoryService;
 use App\Services\Payments\PaymentStatusMachine;
 use App\Services\Payments\PayPalGateway;
 use App\Services\Payments\StripeGateway;
@@ -28,6 +31,7 @@ class OrderController extends ApiController
         private readonly StripeGateway $stripe,
         private readonly PayPalGateway $paypal,
         private readonly AuditLogger $audit,
+        private readonly InventoryService $inventory,
     ) {}
 
     public function index(Request $request): JsonResponse
@@ -148,6 +152,61 @@ class OrderController extends ApiController
     }
 
     /**
+     * Applies one fulfilment status to several orders. Each order goes through
+     * the status machine on its own, so an order that cannot make the move
+     * (409) is reported in `failed` while the rest are still updated.
+     */
+    public function bulkUpdateStatus(BulkOrderStatusRequest $request): JsonResponse
+    {
+        $status = (string) $request->input('status');
+        $updated = [];
+        $failed = [];
+
+        foreach (Order::query()->whereIn('id', $request->ids())->get() as $order) {
+            $this->authorize('update', $order);
+
+            try {
+                $this->machine->applyStatus($order, $status);
+            } catch (ApiException $exception) {
+                $failed[] = ['id' => (int) $order->id, 'message' => $exception->getMessage()];
+
+                continue;
+            }
+
+            $updated[] = (int) $order->id;
+
+            $this->audit->log('order.status.updated', $request->user()?->id, $order, ['status'], $request);
+        }
+
+        return $this->data(['succeeded' => $updated, 'failed' => $failed]);
+    }
+
+    public function destroy(Request $request, int $id): JsonResponse
+    {
+        $order = $this->find($id);
+
+        $this->authorize('delete', $order);
+
+        $this->delete($order, $request);
+
+        return response()->json(null, 204);
+    }
+
+    public function bulkDestroy(BulkIdsRequest $request): JsonResponse
+    {
+        $deleted = [];
+
+        foreach (Order::query()->whereIn('id', $request->ids())->get() as $order) {
+            $this->authorize('delete', $order);
+
+            $this->delete($order, $request);
+            $deleted[] = (int) $order->id;
+        }
+
+        return $this->data(['succeeded' => $deleted, 'failed' => []]);
+    }
+
+    /**
      * Provider refund, capped at the order's refundable balance.
      */
     public function refund(RefundRequest $request, int $id): JsonResponse
@@ -207,6 +266,22 @@ class OrderController extends ApiController
         );
 
         return $this->data(OrderResource::admin($this->find($id)) + ['refundReference' => $reference]);
+    }
+
+    /**
+     * Soft delete: the row, its items and its payment history stay in the
+     * database. Stock held by an order whose goods never left the warehouse
+     * goes back on sale, since a deleted order is never fulfilled or expired.
+     */
+    private function delete(Order $order, Request $request): void
+    {
+        if (in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PROCESSING], true)) {
+            $this->inventory->release($order);
+        }
+
+        $order->delete();
+
+        $this->audit->log('order.deleted', $request->user()?->id, $order, ['deleted_at'], $request);
     }
 
     private function find(int $id): Order
