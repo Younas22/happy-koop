@@ -209,6 +209,16 @@ class SettingsRepository
         return $out;
     }
 
+    /**
+     * Drops the copy held by this instance only, so the next read sees the
+     * shared cache again. A long-running queue worker calls this before each
+     * job; otherwise it would keep the settings it booted with.
+     */
+    public function forgetLoaded(): void
+    {
+        $this->rows = null;
+    }
+
     public function flush(): void
     {
         $this->rows = null;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\Mail\MailSettingsService;
 use App\Services\Settings\SettingsRepository;
 use App\Support\MoneyFormatter;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -11,6 +12,7 @@ use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -42,6 +44,35 @@ class HappyKoopServiceProvider extends ServiceProvider
     {
         $this->registerRateLimiters();
         $this->registerNotificationUrls();
+        $this->applyMailSettings();
+    }
+
+    /**
+     * Mail sender settings saved in the admin panel override the environment.
+     * Applied once the app has booted, and again before every queued job, so a
+     * long-running worker picks up a changed key without a restart. Never
+     * allowed to break boot: the settings table may not exist yet.
+     */
+    private function applyMailSettings(): void
+    {
+        if ($this->app->runningUnitTests()) {
+            return;
+        }
+
+        $apply = function (): void {
+            try {
+                $this->app->make(MailSettingsService::class)->apply();
+            } catch (Throwable) {
+                // Fall back to the environment configuration.
+            }
+        };
+
+        $this->app->booted($apply);
+
+        Queue::before(function () use ($apply): void {
+            $this->app->make(SettingsRepository::class)->forgetLoaded();
+            $apply();
+        });
     }
 
     /**

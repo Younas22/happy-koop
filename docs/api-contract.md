@@ -839,6 +839,8 @@ authorizes via a Policy. Hiding a menu item in the UI is not access control.
 | GET/PUT | `/admin/settings/store` | |
 | GET/PUT | `/admin/settings/payments` | see 8.2 |
 | POST | `/admin/settings/payments/test` | server-side connection check |
+| GET/PUT | `/admin/settings/mail` | Resend key (write-only; status `{configured, maskedSuffix, updatedAt}`), `fromAddress`, `fromName`; overrides MAIL_*/RESEND_API_KEY at runtime. Empty key = unchanged, `clearResendApiKey: true` removes it |
+| POST | `/admin/settings/mail/test` | sends a test email now to `to` (default: the admin) |
 | GET | `/admin/audit-logs` | paginated, read-only |
 | GET/POST | `/admin/users` | role assignment |
 | PATCH/DELETE | `/admin/users/{id}` | cannot remove own admin role or self-delete |

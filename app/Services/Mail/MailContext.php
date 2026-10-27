@@ -44,7 +44,9 @@ class MailContext
 
     public function fromName(): string
     {
-        return $this->storeName();
+        $name = trim((string) $this->settings->getString('mail.from_name', ''));
+
+        return $name !== '' ? $name : $this->storeName();
     }
 
     /**

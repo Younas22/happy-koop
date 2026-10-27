@@ -103,6 +103,17 @@ php artisan schedule:work   # expires abandoned pending orders
 Without a worker, payment webhooks are still **recorded** (so nothing is lost and
 idempotency holds) but their side effects will not be applied until one runs.
 
+Emails (order and contact) are queued too, so they are only sent while a worker runs.
+On shared hosting without a persistent process, a cron entry such as
+`* * * * * php artisan queue:work --stop-when-empty` does the job.
+
+### Email sender
+
+The Resend API key, From address and From name can be set in the admin panel
+(**Configuration → Email**). Saved values are stored in the database (the key
+encrypted) and override `MAIL_MAILER`, `MAIL_FROM_*` and `RESEND_API_KEY` at runtime;
+`.env` is never written. With nothing saved there, the `.env` values are used.
+
 ---
 
 ## Commands

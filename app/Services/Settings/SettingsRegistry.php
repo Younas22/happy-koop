@@ -95,6 +95,14 @@ final class SettingsRegistry
         'payments.paypal.client_secret' => [Setting::TYPE_ENCRYPTED, 'payments', false, null],
         'payments.paypal.webhook_id' => [Setting::TYPE_ENCRYPTED, 'payments', false, null],
         'payments.paypal.last_check' => [Setting::TYPE_JSON, 'payments', false, null],
+
+        // ----------------------------------------------------------- mail
+        // Override the MAIL_* / RESEND_API_KEY environment values when set,
+        // so the sender can be managed from the admin panel.
+        'mail.resend_api_key' => [Setting::TYPE_ENCRYPTED, 'mail', false, null],
+        'mail.from_address' => [Setting::TYPE_STRING, 'mail', false, null],
+        'mail.from_name' => [Setting::TYPE_STRING, 'mail', false, null],
+        'mail.last_test' => [Setting::TYPE_JSON, 'mail', false, null],
     ];
 
     /**
@@ -108,6 +116,7 @@ final class SettingsRegistry
         'payments.stripe.webhook_secret',
         'payments.paypal.client_secret',
         'payments.paypal.webhook_id',
+        'mail.resend_api_key',
     ];
 
     public static function has(string $key): bool

@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\V1\Admin\HomeSectionController;
 use App\Http\Controllers\Api\V1\Admin\MediaController;
 use App\Http\Controllers\Api\V1\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Api\V1\Admin\PageController as AdminPageController;
+use App\Http\Controllers\Api\V1\Admin\MailSettingsController;
 use App\Http\Controllers\Api\V1\Admin\PaymentSettingsController;
 use App\Http\Controllers\Api\V1\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\ProductRelationsController;
@@ -253,6 +254,10 @@ Route::prefix('v1')->group(function (): void {
                 Route::get('settings/payments', [PaymentSettingsController::class, 'show']);
                 Route::put('settings/payments', [PaymentSettingsController::class, 'update']);
                 Route::post('settings/payments/test', [PaymentSettingsController::class, 'test']);
+
+                Route::get('settings/mail', [MailSettingsController::class, 'show']);
+                Route::put('settings/mail', [MailSettingsController::class, 'update']);
+                Route::post('settings/mail/test', [MailSettingsController::class, 'test']);
             });
 
             // --- users & audit ---------------------------------------------
