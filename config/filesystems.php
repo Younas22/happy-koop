@@ -47,6 +47,18 @@ return [
             'report' => false,
         ],
 
+        // Uploaded media lives directly under public/uploads, so the web
+        // server serves it as a plain file: no storage:link symlink and nothing
+        // under storage/.
+        'uploads' => [
+            'driver' => 'local',
+            'root' => public_path('uploads'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/uploads',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

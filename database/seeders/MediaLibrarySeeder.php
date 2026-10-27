@@ -95,12 +95,14 @@ class MediaLibrarySeeder extends Seeder
         $storedName = Str::lower(Str::random(40)).'.'.$extension;
         $path = $folder.'/'.$storedName;
 
-        Storage::disk('public')->put($path, (string) file_get_contents($source));
+        $disk = (string) config('happykoop.media.disk', 'uploads');
+
+        Storage::disk($disk)->put($path, (string) file_get_contents($source));
 
         $dimensions = @getimagesize($source);
 
         return Media::query()->create([
-            'disk' => 'public',
+            'disk' => $disk,
             'path' => $path,
             'type' => 'image',
             'mime_type' => $mime,

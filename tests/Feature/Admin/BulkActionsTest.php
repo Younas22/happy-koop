@@ -71,16 +71,16 @@ class BulkActionsTest extends TestCase
 
     public function test_media_is_bulk_deleted_with_its_files(): void
     {
-        Storage::fake('public');
+        Storage::fake('uploads');
         $this->actingAsAdmin();
         $media = Media::factory()->count(2)->create();
-        Storage::disk('public')->put($media[0]->path, 'x');
+        Storage::disk('uploads')->put($media[0]->path, 'x');
 
         $this->postJson('/api/v1/admin/media/bulk-delete', ['ids' => $media->pluck('id')->all()])
             ->assertOk();
 
         $this->assertSame(0, Media::query()->count());
-        Storage::disk('public')->assertMissing($media[0]->path);
+        Storage::disk('uploads')->assertMissing($media[0]->path);
     }
 
     public function test_an_order_can_be_deleted(): void

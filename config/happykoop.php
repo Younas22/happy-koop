@@ -46,7 +46,7 @@ return [
     ],
 
     'media' => [
-        'disk' => env('MEDIA_DISK', 'public'),
+        'disk' => env('MEDIA_DISK', 'uploads'),
         'max_image_bytes' => 8 * 1024 * 1024,
         'max_video_bytes' => 64 * 1024 * 1024,
         'max_dimension' => 8000,

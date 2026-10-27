@@ -1,0 +1,8 @@
+# Uploaded media only: never run anything from here as a script.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php\d?|phtml|phar|pl|py|cgi|sh|html?|svgz?|js)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes -ExecCGI

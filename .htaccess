@@ -22,7 +22,13 @@ Options -Indexes -MultiViews
     RewriteRule ^storage/app/public/.*\.(php\d?|phtml|phar)$ - [F,NC]
     RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|[^/]+\.md)$ - [F]
 
-    # Uploaded media: serve /storage/... straight from storage/app/public, so
+    # Uploaded media lives in public/uploads. Only media file types are served;
+    # anything else under /uploads is refused.
+    RewriteRule ^uploads/(.+\.(jpe?g|png|webp|avif|gif|ico|mp4))$ public/uploads/$1 [L,NC]
+    RewriteRule ^uploads(/|$) - [F]
+
+    # Legacy media from before the move to public/uploads: serve /storage/...
+    # straight from storage/app/public, so
     # it works even where the host does not allow the storage:link symlink.
     RewriteRule ^storage/(?!app/public/)(.+\.(jpe?g|png|webp|avif|gif|ico|mp4))$ storage/app/public/$1 [L,NC]
 

@@ -57,7 +57,7 @@ class MediaUploadService
         $this->assertSize($file, $type);
 
         $folder = $this->normalizeFolder($folder);
-        $disk = (string) config('happykoop.media.disk', 'public');
+        $disk = (string) config('happykoop.media.disk', 'uploads');
 
         $extension = self::EXTENSIONS[$mime] ?? null;
 
@@ -98,7 +98,7 @@ class MediaUploadService
 
     public function delete(Media $media): void
     {
-        $disk = Storage::disk($media->disk ?: 'public');
+        $disk = Storage::disk($media->disk ?: (string) config('happykoop.media.disk', 'uploads'));
 
         if ($media->thumbnail_path !== null) {
             $disk->delete($media->thumbnail_path);

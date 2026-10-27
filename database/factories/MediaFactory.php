@@ -20,7 +20,7 @@ class MediaFactory extends Factory
         $name = Str::lower(Str::random(20)).'.webp';
 
         return [
-            'disk' => 'public',
+            'disk' => 'uploads',
             'path' => 'media/'.$name,
             'type' => 'image',
             'mime_type' => 'image/webp',

@@ -48,6 +48,6 @@ class Media extends Model
 
     private function publicUrl(string $path): string
     {
-        return Storage::disk($this->disk ?: 'public')->url($path);
+        return Storage::disk($this->disk ?: (string) config('happykoop.media.disk', 'uploads'))->url($path);
     }
 }
