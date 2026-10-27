@@ -105,11 +105,52 @@ class PageController extends ApiController
             $out['body'] = Html::sanitize($input['body']);
         }
 
+        if (array_key_exists('translations', $input)) {
+            $out['translations'] = $this->translations((array) ($input['translations'] ?? []));
+        }
+
         if (($out['is_published'] ?? false) && ! array_key_exists('published_at', $out)) {
             $out['published_at'] = now();
         }
 
         return $out;
+    }
+
+    /**
+     * Cleans the per-language content the same way as the default language.
+     * Empty fields are dropped, so they fall back to the default language.
+     *
+     * @param  array<string, mixed>  $input  camelCase, keyed by locale
+     * @return array<string, array<string, string>>|null
+     */
+    private function translations(array $input): ?array
+    {
+        $out = [];
+
+        foreach (Page::TRANSLATION_LOCALES as $locale) {
+            $fields = (array) ($input[$locale] ?? []);
+            $clean = [];
+
+            foreach (['title' => 'title', 'excerpt' => 'excerpt', 'seoTitle' => 'seo_title', 'seoDescription' => 'seo_description'] as $inputKey => $key) {
+                $value = Html::text($fields[$inputKey] ?? null, 500);
+
+                if ($value !== null && trim($value) !== '') {
+                    $clean[$key] = $value;
+                }
+            }
+
+            $body = Html::sanitize($fields['body'] ?? null);
+
+            if ($body !== null && trim(strip_tags($body)) !== '') {
+                $clean['body'] = $body;
+            }
+
+            if ($clean !== []) {
+                $out[$locale] = $clean;
+            }
+        }
+
+        return $out === [] ? null : $out;
     }
 
     private function find(int $id): Page

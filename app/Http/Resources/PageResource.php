@@ -11,17 +11,17 @@ final class PageResource
     /**
      * @return array<string, mixed>
      */
-    public static function make(Page $page): array
+    public static function make(Page $page, ?string $locale = null): array
     {
         return [
             'id' => (int) $page->id,
             'slug' => $page->slug,
-            'title' => $page->title,
-            'body' => $page->body,
-            'excerpt' => $page->excerpt,
+            'title' => (string) $page->localized('title', $locale),
+            'body' => $page->localized('body', $locale),
+            'excerpt' => $page->localized('excerpt', $locale),
             'seo' => [
-                'title' => $page->seo_title,
-                'description' => $page->seo_description,
+                'title' => $page->localized('seo_title', $locale),
+                'description' => $page->localized('seo_description', $locale),
                 'noindex' => (bool) $page->seo_noindex,
             ],
             'updatedAt' => $page->updated_at?->toIso8601String(),
@@ -33,7 +33,21 @@ final class PageResource
      */
     public static function admin(Page $page): array
     {
+        $translations = [];
+
+        foreach (Page::TRANSLATION_LOCALES as $locale) {
+            $stored = (array) ($page->translations[$locale] ?? []);
+            $translations[$locale] = [
+                'title' => $stored['title'] ?? null,
+                'body' => $stored['body'] ?? null,
+                'excerpt' => $stored['excerpt'] ?? null,
+                'seoTitle' => $stored['seo_title'] ?? null,
+                'seoDescription' => $stored['seo_description'] ?? null,
+            ];
+        }
+
         return self::make($page) + [
+            'translations' => $translations,
             'isPublished' => (bool) $page->is_published,
             'publishedAt' => $page->published_at?->toIso8601String(),
             'createdAt' => $page->created_at?->toIso8601String(),

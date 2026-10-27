@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\HomeSection;
 use App\Models\Page;
 use App\Models\Product;
+use Database\Seeders\Content\DutchPages;
 use Illuminate\Database\Seeder;
 
 /**
@@ -29,7 +30,11 @@ class CmsSeeder extends Seeder
 
     public function run(): void
     {
+        $dutch = DutchPages::all();
+
         foreach ($this->pages() as $page) {
+            $translations = isset($dutch[$page['slug']]) ? ['nl' => $dutch[$page['slug']]] : null;
+
             /** @var Page|null $existing */
             $existing = Page::query()->where('slug', $page['slug'])->first();
 
@@ -42,6 +47,7 @@ class CmsSeeder extends Seeder
                     'is_published' => true,
                     'published_at' => now(),
                     'seo_noindex' => false,
+                    'translations' => $translations,
                 ]);
 
                 continue;
@@ -58,6 +64,7 @@ class CmsSeeder extends Seeder
             $existing->update([
                 'body' => $page['body'],
                 'excerpt' => $existing->excerpt ?? $page['excerpt'],
+                'translations' => $existing->translations ?? $translations,
             ]);
         }
 
