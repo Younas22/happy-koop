@@ -11,7 +11,9 @@ use App\Support\Money;
 use Stripe\Exception\ApiErrorException;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\StripeClient;
+use Illuminate\Support\Facades\Log;
 use Stripe\Webhook;
+use Throwable;
 use UnexpectedValueException;
 
 /**
@@ -55,7 +57,7 @@ class StripeGateway
         $amount = $order->total;
 
         try {
-            $intent = $client->paymentIntents->create([
+            $intent = $this->quietly(fn () => $client->paymentIntents->create([
                 'amount' => $amount->amount,
                 'currency' => strtolower($amount->currency),
                 'automatic_payment_methods' => ['enabled' => true],
@@ -64,8 +66,8 @@ class StripeGateway
                     'order_id' => (string) $order->id,
                 ],
                 'description' => 'Order '.$order->order_number,
-            ]);
-        } catch (ApiErrorException $e) {
+            ]));
+        } catch (Throwable $e) {
             throw $this->translate($e);
         }
 
@@ -90,7 +92,7 @@ class StripeGateway
         $amount = $order->total;
 
         try {
-            $session = $client->checkout->sessions->create([
+            $session = $this->quietly(fn () => $client->checkout->sessions->create([
                 'mode' => 'payment',
                 'client_reference_id' => $order->order_number,
                 'customer_email' => $order->email,
@@ -110,8 +112,8 @@ class StripeGateway
                         ],
                     ],
                 ]],
-            ]);
-        } catch (ApiErrorException $e) {
+            ]));
+        } catch (Throwable $e) {
             throw $this->translate($e);
         }
 
@@ -123,13 +125,15 @@ class StripeGateway
 
     public function refund(Order $order, Money $amount, string $paymentIntentId): string
     {
+        $client = $this->client();
+
         try {
-            $refund = $this->client()->refunds->create([
+            $refund = $this->quietly(fn () => $client->refunds->create([
                 'payment_intent' => $paymentIntentId,
                 'amount' => $amount->amount,
                 'metadata' => ['order_number' => $order->order_number],
-            ]);
-        } catch (ApiErrorException $e) {
+            ]));
+        } catch (Throwable $e) {
             throw $this->translate($e);
         }
 
@@ -181,11 +185,19 @@ class StripeGateway
         }
 
         try {
-            $account = $this->client()->accounts->retrieve();
+            $client = $this->client();
+            $account = $this->quietly(fn () => $client->accounts->retrieve());
         } catch (ApiErrorException $e) {
             return [
                 'ok' => false,
                 'message' => $this->sanitize($e->getMessage()),
+            ];
+        } catch (Throwable $e) {
+            report($e);
+
+            return [
+                'ok' => false,
+                'message' => 'Stripe check failed: '.$this->sanitize($e->getMessage()),
             ];
         }
 
@@ -209,8 +221,37 @@ class StripeGateway
         ]);
     }
 
-    private function translate(ApiErrorException $e): ApiException
+    /**
+     * Runs a Stripe call. stripe-php reports API notices (e.g. "outdated API
+     * version") via trigger_error() AFTER a successful response; Laravel would
+     * turn that into an ErrorException and fail the request, so log them.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $call
+     * @return T
+     */
+    private function quietly(callable $call): mixed
     {
+        set_error_handler(function (int $level, string $message): bool {
+            Log::warning('Stripe notice: '.$this->sanitize($message));
+
+            return true;
+        }, E_USER_WARNING);
+
+        try {
+            return $call();
+        } finally {
+            restore_error_handler();
+        }
+    }
+
+    private function translate(Throwable $e): ApiException
+    {
+        if ($e instanceof ApiException) {
+            return $e;
+        }
+
         report($e);
 
         return ApiException::serviceUnavailable(
