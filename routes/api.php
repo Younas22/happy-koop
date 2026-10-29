@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\Admin\PaymentSettingsController;
 use App\Http\Controllers\Api\V1\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\ProductRelationsController;
 use App\Http\Controllers\Api\V1\Admin\ReviewController as AdminReviewController;
+use App\Http\Controllers\Api\V1\Admin\ShippingZoneController;
 use App\Http\Controllers\Api\V1\Admin\StoreSettingsController;
 use App\Http\Controllers\Api\V1\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
@@ -222,6 +223,12 @@ Route::prefix('v1')->group(function (): void {
             Route::delete('orders/{id}', [AdminOrderController::class, 'destroy'])->whereNumber('id');
             Route::patch('orders/bulk-status', [AdminOrderController::class, 'bulkUpdateStatus']);
             Route::post('orders/bulk-delete', [AdminOrderController::class, 'bulkDestroy']);
+
+            // --- shipping --------------------------------------------------
+            Route::get('shipping-zones', [ShippingZoneController::class, 'index']);
+            Route::post('shipping-zones', [ShippingZoneController::class, 'store']);
+            Route::patch('shipping-zones/{id}', [ShippingZoneController::class, 'update'])->whereNumber('id');
+            Route::delete('shipping-zones/{id}', [ShippingZoneController::class, 'destroy'])->whereNumber('id');
 
             // --- customers & reviews --------------------------------------
             Route::get('customers', [CustomerController::class, 'index']);

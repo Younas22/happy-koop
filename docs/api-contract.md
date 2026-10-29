@@ -836,6 +836,8 @@ authorizes via a Policy. Hiding a menu item in the UI is not access control.
 | GET/PUT | `/admin/home-sections` | hero `config.imageMediaIds`: up to 10 existing media ids |
 | GET/POST | `/admin/media` | upload |
 | DELETE | `/admin/media/{id}` | |
+| GET/POST | `/admin/shipping-zones` | zones with their `rates` (money objects); body: `name`, `countryCodes` (ISO alpha-2 or `*`), `isActive`, `sortOrder`, `rates[]` (minor units: `priceAmount`, `freeAboveAmount`, `minSubtotalAmount`). Rates take the store currency |
+| PATCH/DELETE | `/admin/shipping-zones/{id}` | `rates`, when sent, replaces the set (`id` = update, none = create, omitted = delete). 422 if a country is already in another zone or a second `*` zone is created; max one `isDefault` rate |
 | GET/PUT | `/admin/settings/store` | |
 | GET/PUT | `/admin/settings/payments` | see 8.2 |
 | POST | `/admin/settings/payments/test` | server-side connection check |
